@@ -6,12 +6,11 @@ from selenium.webdriver.edge.options import Options
 from bs4 import BeautifulSoup
 import time
 
-
 edge_options = Options()
 edge_options.use_chromium = True
 edge_options.set_capability("timeouts", {"connect": 5000})  # Set the connect timeout to 5 seconds
 
-driver = webdriver.Edge(service=Service(executable_path='SET DESTINATION EDGEDRIVER'))
+driver = webdriver.Edge(service=Service(executable_path='C:/Users/rayvi/Desktop/msedgedriver.exe'))
 
 
 # Function to log into the specific website
@@ -38,21 +37,59 @@ def login(username, password):
     
     driver.get('http://wmsu.edu.ph/mywmsu/grade/grades.php')
 
-    '''
-    # Parsing the HTML
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-
-    # Print the HTML content
-    text = soup.get_text()
-    print(text)
-    '''
-
     # Print the site's code
     html_content = driver.page_source
 
-    filename = input("Enter file name you want to create: ")
+    # Create BeautifulSoup object
+    soup = BeautifulSoup(html_content, 'html.parser')
 
+
+    # Print the HTML content
+    text = soup.get_text()
+    # print(text)
+    txt = text
+
+    filename = input("Enter file name you want to create: ")
     fn = filename + ".html"
+    fntxt = filename + ".txt"
+
+
+    id_start = txt.find("STUDENT ID: ") + len("STUDENT ID: ")
+    id_end = txt.find("STUDENT NAME: ")
+    id = txt[id_start:id_end].strip()
+
+    name_start = id_end + len("STUDENT NAME: ")
+    name_end = txt.find("If you")
+    name = txt[name_start:name_end].strip()
+
+    print("STUDENT ID:", id)
+    print("STUDENT NAME:", name + "\n\n")
+
+
+    # Find all section elements inside the div
+    section_tr = soup.find_all('section')
+
+
+    t = open(fntxt, "x")
+    t = open(fntxt, "w")
+    t.write("STUDENT ID: " + id + "\nSTUDENT NAME: " + name + "\n")
+
+    # Iterate through section elements and find tr elements
+    for section in section_tr:
+        t.write("\n")
+        print("\n")
+        all_tr = section.find_all('tr')
+
+        # Extract the contents of each section
+        for tr in all_tr:
+            tr_text = tr.get_text(strip=True)
+            if (tr_text == "Subject CodeDescriptionGrade"):
+                t.write("Subject Code          Description          Grade\n")
+                print("Subject Code          Description          Grade\n")
+            else:
+                t.write(tr_text + "\n")
+                print(tr_text + "\n")
+    t.close()
 
     f = open(fn, "x")
     f = open(fn, "w")
@@ -67,8 +104,8 @@ def login(username, password):
 
 # Main function
 def main():
-    username = input("Enter username: ")
-    password = input("Enter password: ")
+    username = input("Enter username: ")  # Replace with the user's username
+    password = input("Enter password: ")  # Replace with the user's password
 
     login(username, password)
  
