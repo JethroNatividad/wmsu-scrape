@@ -74,21 +74,42 @@ def login(username, password):
     t = open(fntxt, "w")
     t.write("STUDENT ID: " + id + "\nSTUDENT NAME: " + name + "\n")
 
-    # Iterate through section elements and find tr elements
-    for section in section_tr:
-        t.write("\n")
-        print("\n")
-        all_tr = section.find_all('tr')
+    # # Iterate through section elements and find tr elements
+    # for section in section_tr:
+    #     t.write("\n")
+    #     print("\n")
+    #     all_tr = section.find_all('tr')
 
-        # Extract the contents of each section
-        for tr in all_tr:
-            tr_text = tr.get_text(strip=True)
-            if (tr_text == "Subject CodeDescriptionGrade"):
-                t.write("Subject Code          Description          Grade\n")
-                print("Subject Code          Description          Grade\n")
-            else:
-                t.write(tr_text + "\n")
-                print(tr_text + "\n")
+    #     # Extract the contents of each section
+    #     for tr in all_tr:
+    #         tr_text = tr.get_text(strip=True)
+    #         if (tr_text == "Subject CodeDescriptionGrade"):
+    #             t.write("Subject Code          Description          Grade\n")
+    #             print("Subject Code          Description          Grade\n")
+    #         else:
+    #             t.write(tr_text + "\n")
+    #             print(tr_text + "\n")
+    
+    # Get the longest description for the spacing
+    longest_desc = 0
+    for section in soup.find_all('section'):
+        for row in section.find_all('tr')[1:]:
+            desc_len = len(row.find_all('td')[1].text)
+            if desc_len > longest_desc:
+                longest_desc = desc_len
+
+    # Add a little space
+    longest_desc += 3
+
+    for section in soup.find_all('section'):
+        print(section.find('b').text)
+        t.write(section.find('b').text + "\n")
+        for row in section.find_all('tr')[1:]:
+            cols = row.find_all('td')
+            print('{:<15}{:<{desc_len}}{:<10}'.format(cols[0].text, cols[1].text, cols[2].text, desc_len=longest_desc))
+            t.write('{:<15}{:<{desc_len}}{:<10}'.format(cols[0].text, cols[1].text, cols[2].text, desc_len=longest_desc) + "\n")
+        print()
+        t.write("\n")
     t.close()
 
     f = open(fn, "x")
